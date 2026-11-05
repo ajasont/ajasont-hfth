@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home for the Holidays — Ajasont</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080808;
+      --surface: #111111;
+      --border: rgba(255,255,255,0.07);
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --red: #b53a3a;
+      --white: #f0ede8;
+      --muted: rgba(240,237,232,0.4);
+      --radius: 12px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── SNOW ── */
+    #snow-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 24px;
+      z-index: 1;
+    }
+
+    .hero-eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 24px;
+    }
+
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(48px, 10vw, 120px);
+      font-weight: 700;
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .hero-title span {
+      display: block;
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .hero-artist {
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 20px;
+      margin-bottom: 48px;
+    }
+
+    /* ── COUNTDOWN ── */
+    .countdown-wrapper {
+      background: rgba(201, 168, 76, 0.07);
+      border: 1px solid rgba(201, 168, 76, 0.2);
+      border-radius: var(--radius);
+      padding: 24px 40px;
+      margin-bottom: 40px;
+    }
+
+    .countdown-label {
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+
+    .countdown-digits {
+      display: flex;
+      gap: 32px;
+      align-items: flex-start;
+    }
+
+    .cd-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .cd-num {
+      font-size: clamp(32px, 6vw, 56px);
+      font-weight: 700;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+
+    .cd-sep {
+      font-size: 40px;
+      font-weight: 300;
+      line-height: 1;
+      color: var(--gold);
+      padding-top: 6px;
+    }
+
+    .cd-label {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--gold);
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      background: var(--gold-light);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--white);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      border-color: rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      animation: float 2.5s ease-in-out infinite;
+    }
+
+    .scroll-arrow {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--muted), transparent);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(6px); }
+    }
+
+    /* ── SECTION ── */
+    section {
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-header {
+      text-align: center;
+      padding: 80px 24px 48px;
+    }
+
+    .section-eyebrow {
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    /* ── CARD STACK ── */
+    .stack-scene {
+      display: flex;
+      justify-content: center;
+      /* generous padding so rotated corners show without clipping */
+      padding: 40px 80px 56px;
+    }
+
+    .card-stack {
+      position: relative;
+      width: 100%;
+      max-width: 360px;
+      aspect-ratio: 3/4.2;
+    }
+
+    /* ── FLIP CARD ── */
+    .flip-card {
+      position: absolute;
+      inset: 0;
+      perspective: 1200px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+    }
+
+    .flip-card.is-active {
+      cursor: pointer;
+    }
+
+    .flip-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .flip-card.flipped .flip-inner {
+      transform: rotateY(180deg);
+    }
+
+    .flip-front,
+    .flip-back {
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      overflow: hidden;
+    }
+
+    .flip-front {
+      display: flex;
+      flex-direction: column;
+      background: #0e0e0e;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .flip-front-art {
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .flip-front-art img,
+    .flip-front-art .art-placeholder {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s ease;
+    }
+
+    .flip-card:hover .flip-front-art img {
+      transform: scale(1.04);
+    }
+
+    .art-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #141414;
+    }
+
+    .flip-front-info {
+      padding: 16px 20px 18px;
+      background: #0e0e0e;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      flex-shrink: 0;
+    }
+
+    .flip-front-year {
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+
+    .flip-front-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+
+    .flip-front-hint {
+      font-size: 10px;
+      color: rgba(240,237,232,0.25);
+      margin-top: 7px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      letter-spacing: 0.05em;
+    }
+
+    .flip-back {
+      transform: rotateY(180deg);
+      background: #111111;
+      border: 1px solid rgba(201,168,76,0.14);
+      display: flex;
+      flex-direction: column;
+      padding: 28px 24px 20px;
+      gap: 14px;
+    }
+
+    .flip-back-year {
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+
+    .flip-back-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      font-style: italic;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      flex-shrink: 0;
+    }
+
+    .flip-tracks {
+      flex: 1;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .flip-tracks li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--white);
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .flip-tracks li:last-child { border-bottom: none; }
+
+    .flip-track-num {
+      font-size: 10px;
+      color: rgba(201,168,76,0.5);
+      min-width: 18px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .flip-tracks-empty {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .flip-stream-links {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+      padding-top: 4px;
+    }
+
+    .stream-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .stream-btn:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .stream-btn svg { flex-shrink: 0; }
+
+    .flip-hint-back {
+      font-size: 10px;
+      color: rgba(240,237,232,0.18);
+      text-align: center;
+      letter-spacing: 0.1em;
+      flex-shrink: 0;
+    }
+
+    /* ── CAROUSEL NAV ── */
+    .carousel-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 28px;
+    }
+
+    .carousel-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--white);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .carousel-btn:hover:not(:disabled) {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .carousel-btn:disabled {
+      opacity: 0.2;
+      cursor: default;
+    }
+
+    .carousel-dots {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .carousel-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: all 0.25s ease;
+    }
+
+    .carousel-dot.active {
+      background: var(--gold);
+      width: 22px;
+      border-radius: 3px;
+    }
+
+    /* ── NEW RELEASE TEASER ── */
+    .teaser {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 80px 24px 100px;
+      text-align: center;
+    }
+
+    .teaser-badge {
+      display: inline-block;
+      background: var(--red);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: 32px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .teaser-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(40px, 8vw, 88px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 0.95;
+      margin-bottom: 24px;
+    }
+
+    .teaser-title em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .teaser-date {
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      margin-bottom: 40px;
+    }
+
+    .teaser-date strong {
+      color: var(--white);
+      font-weight: 600;
+    }
+
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 40px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      text-align: center;
+    }
+
+    .footer-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-style: italic;
+      color: var(--gold);
+      letter-spacing: -0.01em;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .footer-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--white); }
+
+    .footer-copy {
+      font-size: 11px;
+      color: rgba(240,237,232,0.2);
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      width: 1px;
+      height: 60px;
+      background: linear-gradient(to bottom, transparent, var(--border), transparent);
+      margin: 0 auto;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .countdown-digits { gap: 16px; }
+      .cd-sep { display: none; }
+      .btn { padding: 12px 20px; font-size: 12px; }
+      .stack-scene { padding: 30px 32px 48px; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="snow-canvas"></canvas>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <p class="hero-eyebrow">Ajasont · HFTH · Since 2019</p>
+  <h1 class="hero-title">
+    Home for<br/>
+    <span>the Holidays</span>
+  </h1>
+  <p class="hero-artist">Ajasont</p>
+
+  <div class="countdown-wrapper">
+    <p class="countdown-label">New installment drops — Black Friday</p>
+    <div class="countdown-digits">
+      <div class="cd-unit">
+        <span class="cd-num" id="cd-days">--</span>
+        <span class="cd-label">Days</span>
+      </div>
+      <span class="cd-sep">:</span>
+      <div class="cd-unit">
+        <span class="cd-num" id="cd-hours">--</span>
+        <span class="cd-label">Hours</span>
+      </div>
+      <span class="cd-sep">:</span>
+      <div class="cd-unit">
+        <span class="cd-num" id="cd-mins">--</span>
+        <span class="cd-label">Mins</span>
+      </div>
+      <span class="cd-sep">:</span>
+      <div class="cd-unit">
+        <span class="cd-num" id="cd-secs">--</span>
+        <span class="cd-label">Secs</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-cta">
+    <a href="#new" class="btn btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm-2-7l7-3-7-3v6z"/></svg>
+      Get Notified
+    </a>
+    <a href="#series" class="btn btn-ghost">Explore the Series</a>
+  </div>
+
+  <div class="scroll-indicator">
+    <div class="scroll-arrow"></div>
+    Scroll
+  </div>
+</div>
+
+<!-- ── SERIES ── -->
+<section id="series">
+  <div class="section-header">
+    <p class="section-eyebrow">Every year since 2019</p>
+    <h2 class="section-title">The Collection</h2>
+  </div>
+
+  <div class="stack-scene">
+    <div class="card-stack" id="card-stack"></div>
+  </div>
+  <div class="carousel-nav">
+    <button class="carousel-btn" id="carousel-prev" aria-label="Previous" disabled>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="carousel-dots" id="carousel-dots"></div>
+    <button class="carousel-btn" id="carousel-next" aria-label="Next">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+</section>
+
+<div class="divider" style="margin-top: 60px;"></div>
+
+<!-- ── NEW RELEASE ── -->
+<section id="new">
+  <div class="teaser">
+    <span class="teaser-badge">Coming Black Friday</span>
+    <img src="art/Home for the holidays 7 album art.png" alt="Home for the Holidays 7 cover"
+      style="width:min(280px,70vw);aspect-ratio:1;object-fit:cover;border-radius:12px;margin:0 auto 32px;display:block;box-shadow:0 0 60px rgba(201,168,76,0.15);" />
+    <h2 class="teaser-title">
+      Home for<br/>the Holidays<br/><em>7</em>
+    </h2>
+    <p class="teaser-date">
+      Dropping <strong>Friday, November 27, 2026</strong><br/>
+      On all major streaming platforms
+    </p>
+
+    <a href="https://unitedmasters.com/a/ajasont" target="_blank" rel="noopener" class="btn btn-primary" style="font-size:15px;padding:16px 36px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
+      Get Notified
+    </a>
+    <p style="font-size:11px;color:var(--muted);margin-top:8px;letter-spacing:0.05em;">Powered by UnitedMasters</p>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-logo">Ajasont</div>
+  <nav class="footer-links">
+    <a href="https://www.ajasont.com" target="_blank" rel="noopener">Website</a>
+    <a href="https://open.spotify.com/artist/0s905FLbkxtxs1BpOnMw5W" target="_blank" rel="noopener">Spotify</a>
+    <a href="https://music.apple.com/us/artist/ajasont/1491558479" target="_blank" rel="noopener">Apple Music</a>
+    <a href="https://www.facebook.com/ajasontt" target="_blank" rel="noopener">Facebook</a>
+  </nav>
+  <p class="footer-copy">© 2026 Ajasont · Home for the Holidays </p>
+</footer>
+
+<script>
+// ── SERIES DATA ──────────────────────────────────────────────────────────────
+const series = [
+  {
+    num: 1,
+    year: "2019",
+    title: "Ho Ho Home for the Holidays",
+    subtitle: "Where it all started.",
+    art: "art/Home for the holdays album art.png",
+    tracks: ["To All A Good Night", "Jingle Rockin", "Naughty List", "GiftRap", "Merry Christmas Everybody"],
+    spotify: "https://open.spotify.com/artist/0s905FLbkxtxs1BpOnMw5W",
+    apple: "https://music.apple.com/us/artist/ajasont/1491558479",
+  },
+  {
+    num: 2,
+    year: "2020",
+    title: "Home for the Holidays 2",
+    subtitle: "Year two. The tradition takes shape.",
+    art: "art/Home for the holdays 2 album art.png",
+    tracks: ["I Wanted", "Snowed In", "Santa's Apprentice", "Holiday Jam"],
+    spotify: "https://open.spotify.com/artist/0s905FLbkxtxs1BpOnMw5W",
+    apple: "https://music.apple.com/us/artist/ajasont/1491558479",
+  },
+  {
+    num: 3,
+    year: "2021",
+    title: "Home for the Holidays 3",
+    subtitle: "Third verse.",
+    art: "art/Home for the Holidays 3 album art.png",
+    tracks: ["Christmas & Chill", "Eggnog Sip", "Snowblower", "Santa's Sleigh", "Gifts"],
+    spotify: "https://open.spotify.com/album/0c4oOxnZ9xPMX04GwBODUv",
+    apple: "https://music.apple.com/us/album/home-for-the-holidays-3-rewrapped-ep/1603312331",
+  },
+  {
+    num: 4,
+    year: "2022",
+    title: "Home for the Holidays 4",
+    subtitle: "Four years running.",
+    art: "art/Home for the holidays 4 album art.png",
+    tracks: ["Days of Christmas", "here to Sleigh", "Holday", "Let it Ring", "Silent Night"],
+    spotify: "https://open.spotify.com/artist/0s905FLbkxtxs1BpOnMw5W",
+    apple: "https://music.apple.com/us/artist/ajasont/1491558479",
+  },
+  {
+    num: 5,
+    year: "2023",
+    title: "Home for the Holidays 5",
+    subtitle: "Half a decade of holiday heat.",
+    art: "art/HFTH5 Album Art.png",
+    tracks: ["Red Suit", "Home for the Holidays", "Christmas Morning", "Up to Snow Good", "Through the Snow"],
+    spotify: "https://open.spotify.com/artist/0s905FLbkxtxs1BpOnMw5W",
+    apple: "https://music.apple.com/us/artist/ajasont/1491558479",
+  },
+  {
+    num: 6,
+    year: "2024",
+    title: "Home for the Holidays 6",
+    subtitle: "The latest chapter.",
+    art: "art/HFTH6 album art.png",
+    tracks: ["Christmas Christmas", "Elves", "Holidazed", "Stay Frosty", "Wrapping Paper"],
+    spotify: "https://open.spotify.com/artist/0s905FLbkxtxs1BpOnMw5W",
+    apple: "https://music.apple.com/us/artist/ajasont/1491558479",
+  },
+];
+
+// ── RENDER CARD STACK ────────────────────────────────────────────────────────
+const SPOTIFY_SVG = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>`;
+const APPLE_SVG   = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M23.994 6.124a9.23 9.23 0 00-.24-2.19c-.317-1.31-1.062-2.31-2.18-3.043a5.022 5.022 0 00-1.877-.726 10.496 10.496 0 00-1.564-.15c-.04-.003-.083-.01-.124-.013H5.986c-.152.01-.303.017-.455.026C4.786.07 4.043.15 3.34.428 2.004.958 1.04 1.88.475 3.208A4.86 4.86 0 00.09 4.8C.027 5.11 0 5.424 0 5.74v12.515c.006.335.034.666.09.994a4.918 4.918 0 001.108 2.429 4.995 4.995 0 002.355 1.586 7.69 7.69 0 001.957.345c.21.012.42.02.63.02h12.65c.21 0 .42-.008.63-.02a7.69 7.69 0 001.957-.345 4.995 4.995 0 002.355-1.586 4.918 4.918 0 001.108-2.429c.056-.328.084-.659.09-.994V5.74c0-.316-.027-.63-.09-.94l.004.324zM12 17.5a5.5 5.5 0 110-11 5.5 5.5 0 010 11zm0-9a3.5 3.5 0 100 7 3.5 3.5 0 000-7zm5.75-1.75a1.25 1.25 0 110-2.5 1.25 1.25 0 010 2.5z"/></svg>`;
+
+// Rotations/offsets for each depth level beneath the active card
+const STACK_OFFSETS = [
+  'rotate(-4deg) translate(-10px, 10px)',
+  'rotate(5.5deg) translate(13px, 16px)',
+  'rotate(-2.5deg) translate(-18px, 20px)',
+  'rotate(7deg) translate(9px, 24px)',
+  'rotate(-6deg) translate(-7px, 28px)',
+];
+
+const stackEl   = document.getElementById('card-stack');
+const dotsWrap  = document.getElementById('carousel-dots');
+const btnPrev   = document.getElementById('carousel-prev');
+const btnNext   = document.getElementById('carousel-next');
+let activeIdx   = 0;
+
+series.forEach((ep, i) => {
+  const artHtml = ep.art
+    ? `<img src="${ep.art}" alt="${ep.title} cover" loading="lazy" />`
+    : `<div class="art-placeholder"><span style="font-family:'Playfair Display',serif;font-size:80px;font-style:italic;color:rgba(201,168,76,0.08);">${ep.num}</span></div>`;
+
+  const tracksHtml = ep.tracks.length
+    ? `<ul class="flip-tracks">${ep.tracks.map((t, j) =>
+        `<li><span class="flip-track-num">${String(j+1).padStart(2,'0')}</span>${t}</li>`
+      ).join('')}</ul>`
+    : `<div class="flip-tracks-empty">Tracklist coming soon</div>`;
+
+  const card = document.createElement('div');
+  card.className = 'flip-card';
+  card.dataset.idx = i;
+  card.innerHTML = `
+    <div class="flip-inner">
+      <div class="flip-front">
+        <div class="flip-front-art">${artHtml}</div>
+        <div class="flip-front-info">
+          <div class="flip-front-year">${ep.year}</div>
+          <div class="flip-front-title">${ep.title}</div>
+          <div class="flip-front-hint">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+            Tap to see tracklist
+          </div>
+        </div>
+      </div>
+      <div class="flip-back">
+        <div class="flip-back-year">${ep.year}</div>
+        <div class="flip-back-title">${ep.title}</div>
+        ${tracksHtml}
+        <div class="flip-stream-links">
+          <a href="${ep.spotify}" class="stream-btn" target="_blank" rel="noopener">${SPOTIFY_SVG} Spotify</a>
+          <a href="${ep.apple}"   class="stream-btn" target="_blank" rel="noopener">${APPLE_SVG} Apple Music</a>
+        </div>
+        <div class="flip-hint-back">tap to flip back</div>
+      </div>
+    </div>`;
+
+  card.addEventListener('click', function(e) {
+    if (e.target.closest('.stream-btn')) return;
+    if (!this.classList.contains('is-active')) return;
+    this.classList.toggle('flipped');
+  });
+
+  stackEl.appendChild(card);
+
+  // Dot
+  const dot = document.createElement('button');
+  dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+  dot.setAttribute('aria-label', `Go to ${ep.year}`);
+  dot.addEventListener('click', () => goTo(i));
+  dotsWrap.appendChild(dot);
+});
+
+function updateStack() {
+  const cards = Array.from(stackEl.querySelectorAll('.flip-card'));
+  const n = cards.length;
+  cards.forEach((card, i) => {
+    const depth = ((i - activeIdx) % n + n) % n;
+    card.classList.toggle('is-active', depth === 0);
+    if (depth === 0) {
+      card.style.zIndex = n;
+      card.style.transform = '';
+    } else {
+      card.style.zIndex = n - depth;
+      card.style.transform = STACK_OFFSETS[(depth - 1) % STACK_OFFSETS.length];
+    }
+  });
+  dotsWrap.querySelectorAll('.carousel-dot').forEach((d, i) => d.classList.toggle('active', i === activeIdx));
+  btnPrev.disabled = activeIdx === 0;
+  btnNext.disabled = activeIdx === series.length - 1;
+}
+
+function goTo(idx) {
+  stackEl.querySelectorAll('.flip-card')[activeIdx].classList.remove('flipped');
+  activeIdx = idx;
+  updateStack();
+}
+
+updateStack();
+
+btnPrev.addEventListener('click', () => { if (activeIdx > 0) goTo(activeIdx - 1); });
+btnNext.addEventListener('click', () => { if (activeIdx < series.length - 1) goTo(activeIdx + 1); });
+
+// Touch swipe on the stack
+let touchX = 0;
+stackEl.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+stackEl.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchX;
+  if (Math.abs(dx) > 48) {
+    if (dx < 0 && activeIdx < series.length - 1) goTo(activeIdx + 1);
+    if (dx > 0 && activeIdx > 0) goTo(activeIdx - 1);
+  }
+});
+
+// ── COUNTDOWN ────────────────────────────────────────────────────────────────
+const target = new Date('2026-11-27T00:00:00');
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function tick() {
+  const now = new Date();
+  const diff = target - now;
+
+  if (diff <= 0) {
+    document.getElementById('cd-days').textContent = '00';
+    document.getElementById('cd-hours').textContent = '00';
+    document.getElementById('cd-mins').textContent = '00';
+    document.getElementById('cd-secs').textContent = '00';
+    return;
+  }
+
+  const days  = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const mins  = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const secs  = Math.floor((diff % (1000 * 60)) / 1000);
+
+  document.getElementById('cd-days').textContent  = pad(days);
+  document.getElementById('cd-hours').textContent = pad(hours);
+  document.getElementById('cd-mins').textContent  = pad(mins);
+  document.getElementById('cd-secs').textContent  = pad(secs);
+}
+
+tick();
+setInterval(tick, 1000);
+
+// ── SNOW ─────────────────────────────────────────────────────────────────────
+(function() {
+  const canvas = document.getElementById('snow-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, flakes = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function Flake() {
+    this.x = Math.random() * W;
+    this.y = Math.random() * H - H;
+    this.r = Math.random() * 3 + 0.5;
+    this.speed = Math.random() * 1.0 + 0.3;
+    this.drift = (Math.random() - 0.5) * 0.3;
+    this.opacity = Math.random() * 0.5 + 0.1;
+  }
+
+  for (let i = 0; i < 320; i++) flakes.push(new Flake());
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    flakes.forEach(f => {
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${f.opacity})`;
+      ctx.fill();
+      f.y += f.speed;
+      f.x += f.drift;
+      if (f.y > H) { f.y = -4; f.x = Math.random() * W; }
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+</body>
+</html>
