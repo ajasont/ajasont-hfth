@@ -1002,7 +1002,7 @@ setInterval(tick, 1000);
     position: fixed;
     top: 8%;
     left: 0;
-    width: 500px;
+    width: 320px;
     pointer-events: none;
     z-index: 1;
     opacity: 0.45;
@@ -1020,7 +1020,7 @@ setInterval(tick, 1000);
 
 <div id="sleigh-wrap">
   <div id="sleigh-inner">
-    <svg id="sleigh-svg" viewBox="4 -4 250 48" xmlns="http://www.w3.org/2000/svg" width="500" height="96" aria-hidden="true">
+    <svg id="sleigh-svg" viewBox="4 -4 250 48" xmlns="http://www.w3.org/2000/svg" width="320" height="62" aria-hidden="true">
       <g fill="var(--gold)">
         <!-- deer 1 -->
         <rect x="19" y="0" width="3" height="10"/>
@@ -1107,22 +1107,28 @@ setInterval(tick, 1000);
 <script>
 (function () {
   const wrap = document.getElementById('sleigh-wrap');
-  const SW = 500;
-  let lastY = window.scrollY;
-  let dir = 1;
+  const SW = 320; // matches SVG width
 
   function render() {
     const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-    const pct = window.scrollY / maxScroll;
-    const x = -SW + pct * (window.innerWidth + SW);
+    const pct = window.scrollY / maxScroll; // 0 → 1
 
-    const newDir = window.scrollY > lastY ? 1 : window.scrollY < lastY ? -1 : dir;
-    dir = newDir;
-    lastY = window.scrollY;
+    // 2 passes across the screen per full scroll
+    // pass 0 (pct 0–0.5): left → right
+    // pass 1 (pct 0.5–1):  right → left
+    const totalPct  = pct * 2;              // 0 → 2
+    const passIdx   = Math.floor(totalPct); // 0 or 1
+    const passPos   = totalPct % 1;         // 0 → 1 within the current pass
+    const goRight   = passIdx % 2 === 0;
 
-    wrap.style.transform = dir === -1
-      ? `translateX(${x}px) scaleX(-1)`
-      : `translateX(${x}px)`;
+    const span = window.innerWidth + SW;
+    const x = goRight
+      ? -SW + passPos * span          // enter from left, exit right
+      : window.innerWidth - passPos * span; // enter from right, exit left
+
+    wrap.style.transform = goRight
+      ? `translateX(${x}px)`
+      : `translateX(${x}px) scaleX(-1)`;
   }
 
   window.addEventListener('scroll', render, { passive: true });
